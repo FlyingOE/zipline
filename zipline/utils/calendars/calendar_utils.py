@@ -101,8 +101,6 @@ class TradingCalendarDispatcher(object):
         CalendarNameCollision
             If a calendar is already registered with the given calendar's name.
         """
-        # If we are forcing the registration, remove an existing calendar with
-        # the same name.
         if force:
             self.deregister_calendar(name)
 
@@ -110,6 +108,33 @@ class TradingCalendarDispatcher(object):
             raise CalendarNameCollision(calendar_name=name)
 
         self._calendars[name] = calendar
+
+    def register_calendar_type(self, name, calendar_type, force=False):
+        """
+        Registers a calendar by type.
+
+        Parameters
+        ----------
+        name: str
+            The key with which to register this calendar.
+        calendar_type: type
+            The type of the calendar to register.
+        force : bool, optional
+            If True, old calendars will be overwritten on a name collision.
+            If False, name collisions will raise an exception. Default: False.
+
+        Raises
+        ------
+        CalendarNameCollision
+            If a calendar is already registered with the given calendar's name.
+        """
+        if force:
+            self._calendar_factories.pop(name, None)
+
+        if name in self._calendar_factories:
+            raise CalendarNameCollision(calendar_name=name)
+
+        self._calendar_factories[name] = calendar_type
 
     def deregister_calendar(self, name):
         """
@@ -140,3 +165,4 @@ get_calendar = global_calendar_dispatcher.get_calendar
 clear_calendars = global_calendar_dispatcher.clear_calendars
 deregister_calendar = global_calendar_dispatcher.deregister_calendar
 register_calendar = global_calendar_dispatcher.register_calendar
+register_calendar_type = global_calendar_dispatcher.register_calendar_type
